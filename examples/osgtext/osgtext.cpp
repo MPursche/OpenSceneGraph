@@ -36,61 +36,6 @@
 #include <osgText/Font>
 #include <osgText/Text>
 
-// These shaders are only required for GL3/GL4 core profile.
-// The fragment shader uses the red component of the font texture and not the alpha channel (GL_ALPHA is deprecated in the core profile),.
-// osgText will write to GL_RED instead of GL_ALPHA if it is compiled with OSG_GL3_AVAILABLE but not with OSG_GL2_AVAILABLE or OSG_GL1_AVAILABLE.
-#if defined(OSG_GL3_AVAILABLE) && !defined(OSG_GL2_AVAILABLE) && !defined(OSG_GL1_AVAILABLE)
-static const char *gl3TextVertexShader = {
-    "#version 330 core\n"
-    "in vec4 osg_Vertex;\n"
-    "in vec4 osg_Color;\n"
-    "in vec4 osg_MultiTexCoord0;\n"
-    "uniform mat4 osg_ModelViewProjectionMatrix;\n"
-    "out vec2 texCoord;\n"
-    "out vec4 vertexColor;\n"
-    "void main(void)\n"
-    "{\n"
-    "    gl_Position = osg_ModelViewProjectionMatrix * osg_Vertex;\n"
-    "    texCoord = osg_MultiTexCoord0.xy;\n"
-    "    vertexColor = osg_Color; \n"
-    "}\n"
-};
-
-static const char *gl3TextFragmentShader = {
-    "#version 330 core\n"
-    "uniform sampler2D glyphTexture;\n"
-    "in vec2 texCoord;\n"
-    "in vec4 vertexColor;\n"
-    "out vec4 color;\n"
-    "void main(void)\n"
-    "{\n"
-    "    color = vertexColor * texture(glyphTexture, texCoord).rrrr;\n"
-    "}\n"
-};
-#endif
-
-
-static const char* vertexShader = {
-    "varying vec2 texCoord;\n"
-    "varying vec4 vertexColor;\n"
-    "void main(void)\n"
-    "{\n"
-    "    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
-    "    texCoord = gl_MultiTexCoord0.xy;\n"
-    "    vertexColor = gl_Color; \n"
-    "}\n"
-};
-
-static const char* fragmentShader = {
-    "uniform sampler2D glyphTexture;\n"
-    "varying vec2 texCoord;\n"
-    "varying vec4 vertexColor;\n"
-    "void main(void)\n"
-    "{\n"
-    "    gl_FragColor = vertexColor * texture(glyphTexture, texCoord).aaaa;\n"
-    "}\n"
-};
-
 osg::Group* createHUDText()
 {
 
@@ -103,19 +48,9 @@ osg::Group* createHUDText()
     osg::Geode* geode  = new osg::Geode;
     rootNode->addChild(geode);
 
-    bool useVBOs = false;
-#if defined(OSG_GL3_AVAILABLE) && !defined(OSG_GL2_AVAILABLE) && !defined(OSG_GL1_AVAILABLE)
-    useVBOs = true;
-    osg::Program* program = new osg::Program;
-    program->addShader(new osg::Shader(osg::Shader::VERTEX, gl3TextVertexShader));
-    program->addShader(new osg::Shader(osg::Shader::FRAGMENT, gl3TextFragmentShader));
-    geode->getOrCreateStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON);
-#endif
-
     float windowHeight = 1024.0f;
     float windowWidth = 1280.0f;
     float margin = 50.0f;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -127,7 +62,6 @@ osg::Group* createHUDText()
 
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(layoutColor);
         text->setCharacterSize(layoutCharacterSize);
@@ -143,7 +77,6 @@ osg::Group* createHUDText()
 
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(layoutColor);
         text->setCharacterSize(layoutCharacterSize);
@@ -159,7 +92,6 @@ osg::Group* createHUDText()
 
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(layoutColor);
         text->setPosition(osg::Vec3(margin,windowHeight-margin,0.0f));
@@ -185,7 +117,6 @@ osg::Group* createHUDText()
 
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(fontSizeColor);
         text->setCharacterSize(fontSizeCharacterSize);
@@ -201,7 +132,6 @@ osg::Group* createHUDText()
     cursor.y() -= fontSizeCharacterSize;
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(fontSizeColor);
         text->setCharacterSize(fontSizeCharacterSize);
@@ -217,7 +147,6 @@ osg::Group* createHUDText()
     cursor.y() -= fontSizeCharacterSize;
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(fontSizeColor);
         text->setCharacterSize(fontSizeCharacterSize);
@@ -242,7 +171,6 @@ osg::Group* createHUDText()
 
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(characterSizeColor);
         text->setFontResolution(20,20);
@@ -258,7 +186,6 @@ osg::Group* createHUDText()
     cursor.y() -= 30.0f;
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(characterSizeColor);
         text->setFontResolution(30,30);
@@ -274,7 +201,6 @@ osg::Group* createHUDText()
     cursor.y() -= 50.0f;
     {
         osgText::Text* text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setFont(font);
         text->setColor(characterSizeColor);
         text->setFontResolution(40,40);
@@ -366,7 +292,6 @@ osg::Group* createHUDText()
 
     {
         osg::ref_ptr<osgText::Text> text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setColor(fontColor);
         text->setPosition(cursor);
         text->setCharacterSize(fontCharacterSize);
@@ -382,7 +307,6 @@ osg::Group* createHUDText()
         osg::ref_ptr<osgText::Font> arial = osgText::readRefFontFile("fonts/arial.ttf");
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setColor(fontColor);
         text->setPosition(cursor);
         text->setCharacterSize(fontCharacterSize);
@@ -400,7 +324,6 @@ osg::Group* createHUDText()
         osg::ref_ptr<osgText::Font> times = osgText::readRefFontFile("fonts/times.ttf");
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setColor(fontColor);
         text->setPosition(cursor);
         text->setCharacterSize(fontCharacterSize);
@@ -421,7 +344,6 @@ osg::Group* createHUDText()
         osg::ref_ptr<osgText::Font> dirtydoz = osgText::readRefFontFile("fonts/dirtydoz.ttf");
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setColor(fontColor);
         text->setPosition(cursor);
         text->setCharacterSize(fontCharacterSize);
@@ -439,7 +361,6 @@ osg::Group* createHUDText()
         osg::ref_ptr<osgText::Font> fudd = osgText::readRefFontFile("fonts/fudd.ttf");
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text;
-        text->setUseVertexBufferObjects(useVBOs);
         text->setColor(fontColor);
         text->setPosition(cursor);
         text->setCharacterSize(fontCharacterSize);
@@ -465,16 +386,6 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
 
     osg::Geode* geode  = new osg::Geode;
 
-    bool useVBOs = false;
-#if defined(OSG_GL3_AVAILABLE) && !defined(OSG_GL2_AVAILABLE) && !defined(OSG_GL1_AVAILABLE)
-    useVBOs = true;
-    osg::Program* program = new osg::Program;
-    program->addShader(new osg::Shader(osg::Shader::VERTEX, gl3TextVertexShader));
-    program->addShader(new osg::Shader(osg::Shader::FRAGMENT, gl3TextFragmentShader));
-    geode->getOrCreateStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON);
-#endif
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Examples of how to set up axis/orientation alignments
@@ -486,7 +397,6 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
     osg::Vec3 pos(center.x()-radius*.5f,center.y()-radius*.5f,center.z()-radius*.5f);
 
     osgText::Text* text1 = new osgText::Text;
-    text1->setUseVertexBufferObjects(useVBOs);
     text1->setFont("fonts/times.ttf");
     text1->setCharacterSize(characterSize);
     text1->setPosition(pos);
@@ -495,7 +405,6 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
     geode->addDrawable(text1);
 
     osgText::Text* text2 = new osgText::Text;
-    text2->setUseVertexBufferObjects(useVBOs);
     text2->setFont("fonts/times.ttf");
     text2->setCharacterSize(characterSize);
     text2->setPosition(pos);
@@ -504,7 +413,6 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
     geode->addDrawable(text2);
 
     osgText::Text* text3 = new osgText::Text;
-    text3->setUseVertexBufferObjects(useVBOs);
     text3->setFont("fonts/times.ttf");
     text3->setCharacterSize(characterSize);
     text3->setPosition(pos);
@@ -515,7 +423,6 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
     osg::Vec4 characterSizeModeColor(1.0f,0.0f,0.5f,1.0f);
 
     osgText::Text* text4 = new osgText::Text;
-    text4->setUseVertexBufferObjects(useVBOs);
     text4->setFont("fonts/times.ttf");
     text4->setCharacterSize(characterSize);
     text4->setPosition(center);
@@ -529,7 +436,6 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
     geode->addDrawable(text4);
 
     osgText::Text* text5 = new osgText::Text;
-    text5->setUseVertexBufferObjects(useVBOs);
     text5->setColor(characterSizeModeColor);
     text5->setFont("fonts/times.ttf");
     //text5->setCharacterSize(characterSize);
@@ -542,7 +448,6 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
     geode->addDrawable(text5);
 
     osgText::Text* text6 = new osgText::Text;
-    text6->setUseVertexBufferObjects(useVBOs);
     text6->setColor(characterSizeModeColor);
     text6->setFont("fonts/times.ttf");
     text6->setCharacterSize(characterSize);
@@ -553,7 +458,6 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
     geode->addDrawable(text6);
 
     osgText::Text* text7 = new osgText::Text;
-    text7->setUseVertexBufferObjects(useVBOs);
     text7->setColor(characterSizeModeColor);
     text7->setFont("fonts/times.ttf");
     text7->setCharacterSize(characterSize);
@@ -564,10 +468,11 @@ osg::Group* create3DText(const osg::Vec3& center,float radius)
     geode->addDrawable(text7);
 
 
-
+#if 0
     osg::ShapeDrawable* shape = new osg::ShapeDrawable(new osg::Sphere(center,characterSize*0.2f));
     shape->getOrCreateStateSet()->setMode(GL_LIGHTING,osg::StateAttribute::ON);
     geode->addDrawable(shape);
+#endif
 
     osg::Group* rootNode = new osg::Group;
     rootNode->addChild(geode);
@@ -710,12 +615,11 @@ struct TextCounterCallback : public osg::NodeCallback
     TextCounterCallback():
         _textCounter(100000) {}
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    virtual void operator()(osg::Node* node, osg::NodeVisitor*)
     {
         osgText::Text* text = dynamic_cast<osgText::Text*>(node);
         if (text)
         {
-
             std::stringstream str;
             str <<"Text Counter "<<_textCounter<<std::endl;
             OSG_NOTICE<<"Udating text"<<str.str()<<std::endl;
@@ -853,21 +757,6 @@ int main(int argc, char** argv)
         // set the scene to render
         viewer.setSceneData(group);
     }
-
-    if (arguments.read("--shaders"))
-    {
-        osg::ref_ptr<osg::Program> program = new osg::Program;
-        program->addShader(new osg::Shader(osg::Shader::VERTEX, vertexShader));
-        program->addShader(new osg::Shader(osg::Shader::FRAGMENT, fragmentShader));
-
-        osg::ref_ptr<osg::Node> root = viewer.getSceneData();
-        osg::ref_ptr<osg::StateSet> ss = root->getOrCreateStateSet();
-
-        ss->setAttribute(program.get());
-        ss->addUniform(new osg::Uniform("glyphTexture", 0));
-
-    }
-
 
     std::string filename;
     if (arguments.read("-o",filename))
